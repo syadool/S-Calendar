@@ -1,0 +1,24 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(dir \"C:\\\\Users\\\\tak-m\\\\Documents\\\\student-calendar\")",
+      "Bash(rm -f \"/mnt/c/Users/tak-m/Documents/student-calendar/src/lib/prisma.ts\")",
+      "Bash(rm -f \"/mnt/c/Users/tak-m/Documents/student-calendar/src/lib/auth.ts\")",
+      "Bash(rm -f \"/mnt/c/Users/tak-m/Documents/student-calendar/src/types/next-auth.d.ts\")",
+      "Bash(rm -f \"/mnt/c/Users/tak-m/Documents/student-calendar/src/app/api/auth/[...nextauth]/route.ts\")",
+      "Bash(rm -f \"/mnt/c/Users/tak-m/Documents/student-calendar/src/app/api/auth/register/route.ts\")",
+      "Read(//mnt/c/Users/tak-m/Documents/student-calendar/src/**)",
+      "Read(//mnt/c/Users/tak-m/Documents/student-calendar/src/app/api/**)",
+      "Bash(cmd.exe /c \"del /f /q \\\\\"C:\\\\Users\\\\tak-m\\\\Documents\\\\student-calendar\\\\src\\\\lib\\\\prisma.ts\\\\\" 2>&1 & echo del1done\")",
+      "Bash(cmd.exe /c \"del /f /q \\\\\"C:\\\\Users\\\\tak-m\\\\Documents\\\\student-calendar\\\\src\\\\lib\\\\auth.ts\\\\\" 2>&1 & echo del2done\")",
+      "Bash(cmd.exe /c \"del /f /q \\\\\"C:\\\\Users\\\\tak-m\\\\Documents\\\\student-calendar\\\\src\\\\types\\\\next-auth.d.ts\\\\\" 2>&1 & echo del3done\")"
+    ]
+  }
+}

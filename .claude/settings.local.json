@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(openssl genrsa *)",
+      "Read(//tmp/**)",
+      "Bash(echo \"TSC EXIT=$?\")",
+      "Bash(firebase --version)",
+      "Bash(firebase projects:list)",
+      "Bash(firebase use *)",
+      "Bash(firebase deploy *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(ls .claude)",
+      "Bash(ls .claude/agents)",
+      "Bash(findstr /R /S \"isCourseEvent\\\\|isShiftEvent\\\\|CalendarEvent\" src)",
+      "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\tak-m\\\\Documents\\\\student-calendar\\\\src\\\\app\\\\api\\\\events\" -Force)",
+      "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\tak-m\\\\Documents\\\\student-calendar\\\\src\\\\app\\\\api\\\\events\\\\[id]\" -Force)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(Remove-Item *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\tak-m\\\\Documents\\\\student-calendar\" -Recurse -File | Where-Object { $_.FullName -notmatch \"node_modules\" -and \\($_.Extension -in \".json\",\".env\",\".pem\",\".key\" -or $_.Name -match \"service.?account|firebase.?admin|credential\"\\) } | Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\tak-m\\\\Documents\\\\student-calendar\" -File | Where-Object { $_.Name -match \"\\\\.env\" } | Select-Object FullName)",
+      "Bash(gcloud --version)",
+      "Bash(gcloud auth *)",
+      "Bash(firebase login:list)",
+      "Bash(firebase help *)",
+      "Bash(gcloud iam service-accounts list *)",
+      "Bash(node *)",
+      "Bash(firebase apps:sdkconfig *)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\tak-m\\\\AppData\\\\Local\\\\Temp\\\\sa-key-new.json\" -Force)",
+      "Bash(gh --version)",
+      "Bash(git --version)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}
