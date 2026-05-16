@@ -38,7 +38,8 @@ export function withAuth<T>(
       if (e instanceof AuthError) {
         return Response.json({ error: 'Unauthorized', message: e.message }, { status: e.status });
       }
-      throw e;
+      console.error(e);
+      return Response.json({ error: 'InternalError', message: '内部エラー' }, { status: 500 });
     }
   };
 }

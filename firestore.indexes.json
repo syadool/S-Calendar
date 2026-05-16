@@ -1,15 +1,7 @@
 {
   "indexes": [
     {
-      "collectionGroup": "courses",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "dayOfWeek", "order": "ASCENDING" },
-        { "fieldPath": "period", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "shifts",
+      "collectionGroup": "events",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "date", "order": "ASCENDING" },

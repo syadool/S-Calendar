@@ -3,26 +3,33 @@ import { withAuth } from '@/lib/auth-server';
 import { adminDb } from '@/lib/firebase-admin';
 import { calculateFreeSlots } from '@/lib/free-slots';
 import { toEventDTO } from '@/lib/dto';
+import { freeSlotsQuerySchema } from '@/lib/validation';
+import { parseISO } from '@/lib/date';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withAuth(async (req: NextRequest, { user }) => {
   const { searchParams } = new URL(req.url);
-  const startDate = searchParams.get('startDate'); // "YYYY-MM-DD"
-  const endDate = searchParams.get('endDate'); // "YYYY-MM-DD"
-  const dayStart = searchParams.get('dayStart') ?? '08:00';
-  const dayEnd = searchParams.get('dayEnd') ?? '22:00';
-  const minDuration = parseInt(searchParams.get('minDuration') ?? '30', 10);
 
-  if (!startDate || !endDate) {
+  const raw = {
+    startDate: searchParams.get('startDate') ?? undefined,
+    endDate: searchParams.get('endDate') ?? undefined,
+    dayStart: searchParams.get('dayStart') ?? undefined,
+    dayEnd: searchParams.get('dayEnd') ?? undefined,
+    minDuration: searchParams.get('minDuration') ?? undefined,
+  };
+
+  const parsed = freeSlotsQuerySchema.safeParse(raw);
+  if (!parsed.success) {
     return Response.json(
-      { error: 'ValidationError', message: 'startDateとendDateは必須です' },
+      { error: 'ValidationError', message: parsed.error.errors[0].message },
       { status: 400 }
     );
   }
 
-  const start = new Date(startDate + 'T00:00:00');
-  const end = new Date(endDate + 'T00:00:00');
+  const { startDate, endDate, dayStart, dayEnd, minDuration } = parsed.data;
+  const start = parseISO(startDate);
+  const end = parseISO(endDate);
 
   const eventsSnap = await adminDb
     .collection('users')

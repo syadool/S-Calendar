@@ -33,7 +33,15 @@
       "Bash(git add *)",
       "Bash(git rm *)",
       "Bash(git commit -m ' *)",
-      "Bash(gh repo *)"
+      "Bash(gh repo *)",
+      "PowerShell(npm run *)",
+      "PowerShell(npm test *)",
+      "PowerShell(npm install *)",
+      "PowerShell(npm ls *)",
+      "PowerShell(npm *)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(npm test *)"
     ]
   }
 }

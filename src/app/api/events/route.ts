@@ -2,13 +2,23 @@ import { NextRequest } from 'next/server';
 import { FieldValue } from 'firebase-admin/firestore';
 import { withAuth } from '@/lib/auth-server';
 import { adminDb } from '@/lib/firebase-admin';
-import { createEventSchema } from '@/lib/validation';
+import { createEventSchema, eventsListQuerySchema } from '@/lib/validation';
 import { toEventDTO } from '@/lib/dto';
 
 export const GET = withAuth(async (req: NextRequest, { user }) => {
   const { searchParams } = new URL(req.url);
-  const startDate = searchParams.get('startDate'); // "YYYY-MM-DD"
-  const endDate = searchParams.get('endDate'); // "YYYY-MM-DD"
+
+  const queryParsed = eventsListQuerySchema.safeParse({
+    startDate: searchParams.get('startDate') ?? undefined,
+    endDate: searchParams.get('endDate') ?? undefined,
+  });
+  if (!queryParsed.success) {
+    return Response.json(
+      { error: 'ValidationError', message: queryParsed.error.errors[0].message },
+      { status: 400 }
+    );
+  }
+  const { startDate, endDate } = queryParsed.data;
 
   let query: FirebaseFirestore.Query = adminDb
     .collection('users')

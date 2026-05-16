@@ -10,33 +10,32 @@ import { Spinner } from '@/components/ui/Spinner';
 import type { EventDTO } from '@/types/api';
 import { apiFetch } from '@/lib/api-client';
 import { getWeekRange, getMonthRange, formatDate } from '@/lib/date';
+import { useShiftEvents } from '@/hooks/useShiftEvents';
+import { shiftEventsToEventDTOs } from '@/lib/shiftApi/adapter';
 
 function CalendarContent() {
   const { currentView, currentDate } = useCalendar();
   const [events, setEvents] = useState<EventDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const range = (() => {
+    if (currentView === 'day') {
+      return { start: currentDate, end: currentDate };
+    }
+    if (currentView === 'week') return getWeekRange(currentDate);
+    return getMonthRange(currentDate);
+  })();
+  const { events: shiftEvents } = useShiftEvents({
+    from: formatDate(range.start),
+    to: formatDate(range.end),
+  });
+
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       try {
-        let startDate: Date;
-        let endDate: Date;
-        if (currentView === 'day') {
-          startDate = currentDate;
-          endDate = currentDate;
-        } else if (currentView === 'week') {
-          const range = getWeekRange(currentDate);
-          startDate = range.start;
-          endDate = range.end;
-        } else {
-          const range = getMonthRange(currentDate);
-          startDate = range.start;
-          endDate = range.end;
-        }
-
         const eventsData = await apiFetch<{ events: EventDTO[] }>(
-          `/api/events?startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`
+          `/api/events?startDate=${formatDate(range.start)}&endDate=${formatDate(range.end)}`
         );
         setEvents(eventsData.events ?? []);
       } catch (error) {
@@ -47,7 +46,13 @@ function CalendarContent() {
     }
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentView, currentDate]);
+
+  const mergedEvents: EventDTO[] = [
+    ...events,
+    ...shiftEventsToEventDTOs(shiftEvents as unknown[]),
+  ];
 
   if (loading) {
     return (
@@ -61,13 +66,13 @@ function CalendarContent() {
     <div>
       <CalendarHeader />
       {currentView === 'week' && (
-        <WeekView currentDate={currentDate} events={events} />
+        <WeekView currentDate={currentDate} events={mergedEvents} />
       )}
       {currentView === 'day' && (
-        <DayView currentDate={currentDate} events={events} />
+        <DayView currentDate={currentDate} events={mergedEvents} />
       )}
       {currentView === 'month' && (
-        <MonthView currentDate={currentDate} events={events} />
+        <MonthView currentDate={currentDate} events={mergedEvents} />
       )}
     </div>
   );

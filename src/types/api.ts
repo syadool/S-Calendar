@@ -6,6 +6,7 @@ export interface EventDTO {
   endTime: string;     // "HH:mm"
   color: string;
   note: string | null;
+  source?: 'local' | 'shift';
 }
 
 export interface FreeSlot {

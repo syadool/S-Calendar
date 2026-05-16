@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { withAuth } from '@/lib/auth-server';
 import { adminDb } from '@/lib/firebase-admin';
 import { updateEventSchema } from '@/lib/validation';
+import { toMinutes } from '@/lib/time';
 import { toEventDTO } from '@/lib/dto';
 
 export const PUT = withAuth(
@@ -35,6 +36,16 @@ export const PUT = withAuth(
     const existing = await docRef.get();
     if (!existing.exists) {
       return Response.json({ error: 'NotFound', message: 'イベントが見つかりません' }, { status: 404 });
+    }
+
+    const existingData = existing.data()!;
+    const mergedStartTime = parsed.data.startTime ?? (existingData.startTime as string);
+    const mergedEndTime = parsed.data.endTime ?? (existingData.endTime as string);
+    if (toMinutes(mergedEndTime) <= toMinutes(mergedStartTime)) {
+      return Response.json(
+        { error: 'ValidationError', message: 'endTime must be after startTime' },
+        { status: 400 }
+      );
     }
 
     const updateData: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() };

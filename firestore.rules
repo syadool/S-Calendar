@@ -6,8 +6,9 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
-      // すべてのサブコレクション (courses, shifts, settings) を自分のみ
-      match /{collection}/{docId} {
+      // 直下のサブコレクション (events) を本人のみ R/W 可（明示列挙し、将来の追加サブコレクションが
+      // 自動的に公開されることを防ぐ。新規サブコレクション追加時は本ファイルへの追記必須）
+      match /events/{eventId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }

@@ -1,74 +1,55 @@
 # 学生向けカレンダーアプリ
 
-時間割とバイトシフトを管理し、空き時間を自動提案する学生向けWebカレンダーアプリ。
+Firebase Authentication + Cloud Firestore を使った学生向け Web カレンダーアプリ。
+
+## 機能
+
+- **認証**: Firebase Authentication（Email/Password + Google OAuth）
+- **カレンダー**: 予定（Event）の CRUD と 日 / 週 / 月 ビュー
+- **空き時間検索**: 期間 × 1 日内時間帯 × 最小時間で空きスロットを算出
+- **シフト連携（オプション）**: 外部シフト API からシフトを取得し、カレンダー上に読み取り専用でマージ表示
 
 ## 技術スタック
 
-- **フロントエンド**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
-- **バックエンド**: Next.js API Routes (Route Handlers)
-- **データベース**: PostgreSQL + Prisma ORM
-- **認証**: NextAuth.js v4
-- **OCR**: Tesseract.js
-
-## 主な機能
-
-### Phase 1: 認証
-- メール/パスワード認証
-- Google OAuth（オプション）
-- セッション管理
-
-### Phase 2: カレンダー表示
-- 週ビュー・日ビュー・月ビューの切り替え
-- 授業とシフトの統合表示
-- レスポンシブ対応
-
-### Phase 3: 授業・シフト管理
-- 授業（時間割）のCRUD
-- シフトのCRUD
-- 時限設定のカスタマイズ
-
-### Phase 4: OCR機能
-- 時間割表の画像アップロード
-- シフト表の画像アップロード
-- OCR結果の確認・修正・一括登録
-
-### Phase 5: 空き時間提案
-- 指定期間内の空き時間を自動計算
-- 最小時間のフィルタリング
-- 空き時間の一覧表示
+| レイヤー | 採用 |
+|---|---|
+| フロントエンド | Next.js 14（App Router）+ TypeScript + Tailwind CSS |
+| API | Next.js Route Handlers（Node ランタイム） |
+| 認証 | Firebase Authentication（client SDK + Admin SDK） |
+| DB | Cloud Firestore |
+| 日付 | date-fns 3.x |
+| 入力検証 | zod 3.x |
+| テスト | vitest |
 
 ## セットアップ手順
 
 ### 1. 環境変数の設定
 
-`.env.example` をコピーして `.env` ファイルを作成し、以下の変数を設定してください。
+`.env.local.example` をコピーして `.env.local` を作成し、各変数を設定してください。
 
 ```bash
-cp .env.example .env
+cp .env.local.example .env.local
 ```
 
 #### 必須項目
 
-```env
-# Database (PostgreSQL)
-DATABASE_URL="postgresql://user:password@localhost:5432/student_calendar?schema=public"
+| 変数 | 用途 |
+|---|---|
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase JS SDK |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase JS SDK |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase JS SDK |
+| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Firebase JS SDK |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase JS SDK |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase JS SDK |
+| `FIREBASE_PROJECT_ID` | Admin SDK（サーバーのみ） |
+| `FIREBASE_CLIENT_EMAIL` | Admin SDK サービスアカウント |
+| `FIREBASE_PRIVATE_KEY` | Admin SDK 秘密鍵（`\n` を含む文字列） |
 
-# NextAuth.js
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-here-generate-with-openssl-rand-base64-32"
-```
+#### オプション
 
-#### オプション（Google OAuth を使用する場合）
-
-```env
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-```
-
-**NEXTAUTH_SECRET の生成方法**:
-```bash
-openssl rand -base64 32
-```
+| 変数 | 用途 |
+|---|---|
+| `NEXT_PUBLIC_SHIFT_API_BASE` | 外部シフト API のベース URL。未設定でシフト連携 OFF |
 
 ### 2. 依存パッケージのインストール
 
@@ -76,22 +57,14 @@ openssl rand -base64 32
 npm install
 ```
 
-### 3. データベースのセットアップ
-
-#### PostgreSQL の準備
-
-ローカルまたはクラウド（Supabase、Railway など）で PostgreSQL データベースを用意してください。
-
-#### Prisma マイグレーション
+### 3. Firestore の設定
 
 ```bash
-npx prisma migrate dev --name init
-```
+# セキュリティルールのデプロイ
+npm run firebase:rules
 
-#### Prisma Client の生成
-
-```bash
-npx prisma generate
+# インデックスのデプロイ
+npm run firebase:indexes
 ```
 
 ### 4. 開発サーバーの起動
@@ -102,113 +75,29 @@ npm run dev
 
 ブラウザで [http://localhost:3000](http://localhost:3000) を開いてください。
 
-## プロジェクト構成
+## スクリプト
 
-```
-student-calendar/
-├── prisma/
-│   └── schema.prisma          # Prismaスキーマ
-├── src/
-│   ├── app/                   # Next.js App Router
-│   │   ├── (auth)/           # 認証ページ（ログイン・登録）
-│   │   ├── (dashboard)/      # 認証後のページ
-│   │   │   ├── calendar/     # カレンダー
-│   │   │   ├── timetable/    # 時間割管理
-│   │   │   ├── shifts/       # シフト管理
-│   │   │   ├── free-time/    # 空き時間
-│   │   │   └── settings/     # 設定
-│   │   ├── api/              # API Routes
-│   │   └── layout.tsx        # ルートレイアウト
-│   ├── components/           # Reactコンポーネント
-│   │   ├── ui/              # 汎用UIコンポーネント
-│   │   ├── layout/          # ヘッダー、サイドバーなど
-│   │   ├── auth/            # 認証関連
-│   │   ├── calendar/        # カレンダー関連
-│   │   ├── timetable/       # 時間割関連
-│   │   ├── shifts/          # シフト関連
-│   │   ├── ocr/             # OCR関連
-│   │   └── free-time/       # 空き時間関連
-│   ├── lib/                 # ユーティリティ
-│   │   ├── prisma.ts        # Prisma Client
-│   │   ├── auth.ts          # NextAuth設定
-│   │   ├── date.ts          # 日付ユーティリティ
-│   │   ├── utils.ts         # 汎用ユーティリティ
-│   │   ├── validation.ts    # Zodバリデーション
-│   │   ├── free-slots.ts    # 空き時間計算
-│   │   └── ocr/             # OCR関連ロジック
-│   ├── providers/           # Context Providers
-│   └── types/               # 型定義
-├── .env.example             # 環境変数テンプレート
-├── package.json
-├── tsconfig.json
-└── tailwind.config.ts
+```bash
+npm run dev          # 開発サーバー起動
+npm run build        # 本番ビルド
+npm start            # 本番サーバー起動
+npm run lint         # Lint チェック
+npm test             # ユニットテスト（vitest）
+npm run firebase:rules    # Firestore ルールデプロイ
+npm run firebase:indexes  # Firestore インデックスデプロイ
 ```
 
 ## API エンドポイント
 
-### 認証
-- `POST /api/auth/register` - ユーザー登録
-- `POST /api/auth/[...nextauth]` - NextAuth.js認証
+すべて `Authorization: Bearer <Firebase ID Token>` 必須。
 
-### 授業（Course）
-- `GET /api/courses` - 授業一覧取得
-- `POST /api/courses` - 授業登録
-- `PUT /api/courses/[id]` - 授業更新
-- `DELETE /api/courses/[id]` - 授業削除
-- `POST /api/courses/bulk` - 授業一括登録
-
-### シフト（Shift）
-- `GET /api/shifts` - シフト一覧取得
-- `POST /api/shifts` - シフト登録
-- `PUT /api/shifts/[id]` - シフト更新
-- `DELETE /api/shifts/[id]` - シフト削除
-- `POST /api/shifts/bulk` - シフト一括登録
-
-### OCR
-- `POST /api/ocr/timetable` - 時間割OCR
-- `POST /api/ocr/shift` - シフトOCR
-
-### 空き時間
-- `GET /api/free-slots` - 空き時間取得
-
-### 設定
-- `GET /api/settings/periods` - 時限設定取得
-- `PUT /api/settings/periods` - 時限設定更新
-
-## デプロイ
-
-### Vercel へのデプロイ
-
-1. Vercel アカウントを作成
-2. GitHub リポジトリと連携
-3. 環境変数を設定（DATABASE_URL、NEXTAUTH_SECRET など）
-4. デプロイ
-
-### データベース（Supabase）
-
-1. [Supabase](https://supabase.com) でプロジェクト作成
-2. PostgreSQL の接続文字列を取得
-3. `.env` の `DATABASE_URL` に設定
-4. `npx prisma migrate deploy` でマイグレーション実行
-
-## 開発
-
-```bash
-# 開発サーバー起動
-npm run dev
-
-# ビルド
-npm run build
-
-# 本番サーバー起動
-npm start
-
-# Lintチェック
-npm run lint
-
-# Prisma Studio（データベースGUI）
-npx prisma studio
-```
+| メソッド | パス | 概要 |
+|---|---|---|
+| `GET` | `/api/events?startDate=&endDate=` | 範囲指定でイベント一覧 |
+| `POST` | `/api/events` | イベント作成 |
+| `PUT` | `/api/events/[id]` | イベント部分更新 |
+| `DELETE` | `/api/events/[id]` | イベント削除 |
+| `GET` | `/api/free-slots?startDate=&endDate=&dayStart=&dayEnd=&minDuration=` | 空き時間算出 |
 
 ## ライセンス
 
